@@ -1,0 +1,123 @@
+open source container orchestration tool.
+developed by google.
+helps to manage container applications in different environment like physical, virtual or cloud.
+
+
+Features: High availability with zero downtime.
+		  scalability or high perormane.
+		  Disaster recovery - backup and restore.
+
+
+pod: smallest unit of k8s
+	 Abstraction over container
+	 each pod gets its own ip adress to communicate each other which internal(not public IP)
+	 funeral - which meand they die easily, and new one will created automatically in its place, and internal ip adress created.
+
+
+service: service is basicllay a permanent ip adress which will attach to the pod
+		 even if the pod die, the service and internal ip adress stay, so the mapping won't break.
+		 Also provides load Balancing between the pods/nodes that are configured under same service.
+		 
+		 
+configmap: External configuration of application like mapping to other container or any other application.
+ 
+
+secret: used to store credentials, certificates and other thing that not access to others in base64 encoded format.
+		we can use data from configmap or secret inside of applicatoin pod by using environment variables or property files. 
+
+
+Ingress: Is an API object to manage routing rules for external user's access 
+		 like setting rules to routing traffic or exposing service on the node which is best option to use in prod environment.
+		 Ingress will provide Load Balancing, SSL termination and name base virtual hosting.
+		 
+
+Volume/Data Storage: In which we can attach a physical/virtual/cloud machine storage to a pod.
+
+
+Deployments: where we define bluepring for pods and need to specigy how many replicas we want to run.
+			 we can also scale up and slace down the replicas.
+			 But we can't replicate DataBase Deployments.
+			 
+			 
+StatefulSet: Is specifically meant for apps that runs with DataBase,
+			 This also features same as Deployments to replicate DataBase and slacing them up and scaling, read and right are in sync.
+			 
+		
+3 Processes must be installed on node : kubelet, KubeProxy, Container runtime.
+
+
+kubelet: kubelet is responsible to start the pods with a container inside and assigning the resources form that node to the container.
+		 which comes by default with container runtime, where container runtime is need to run a container in a node.
+		 
+		 
+kubeproxy: farwords the request between the pods which are running on same node. 
+
+
+Master node: Every master node runs with 4 processes that are.
+
+				Api server: which recives authorized request through client, then validate request for creating/scheduling pod.
+				query health of pods 
+
+				scheduler: 
+				
+				Controller manager: detect state of pods and recover.
+				
+				etcd : etcd is a cluster brain, which stores the cluster changes (not app/db data) in key value store.
+				
+				
+	
+
+
+
+kubectl cluster-info − It displays the cluster Info
+
+kubectl get nodes —> gets the status of nodes
+
+kubectl get pod —> gets the list of pods
+
+Kubectl get services —> get the list of services
+
+Kubectl create deployment NAME —image=image name —> deploy pods
+
+Kubectl get deployment —> gets list deployment
+
+Kubectl get replicates —> get the list of replica
+
+Kubectl edit deployment nameOfImage --> to edit configuration of deployment pod
+
+Kubectl logs podname —> to see the logs of pod
+
+Kubectl describe pod podname —> to see the details logs
+
+Kubectl exec  -it podname — bin/bash —> to login into container for debugging
+
+Kubectl delete deployment deploymentname —> to delete pods, also delete the pods
+
+Kubectl apply -f config-file.yaml  —> To create update deplyment components using configuration file in which we define the configuration like service volumes, 
+
+Basic configuration deployment file
+
+Apiversion: apps/v1  
+Kind: Deployment/service
+Metadat:
+	name: nginx-depl
+	labels:
+		app: nginx
+Spec:
+	replicas: 1
+	selector:
+		matchLabels:
+			app: nginx
+	templete:
+		metadata:
+			labels:
+				app: nginx
+		spec:
+			container:
+			 - name: nginx
+			   image: nginx:1.0
+			   ports:
+			   - containerPort: 80
+
+			 
+			 
