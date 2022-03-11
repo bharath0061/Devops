@@ -1,1 +1,151 @@
-ansible is yet to start
+Advantages: 
+	open source
+	Ansible is agent less where it doesn't require any additional software to be installed in client machine
+	Ansible uses playbacks which is written yaml format
+	
+	    
+
+After installing ansible below configuration files created in /etc/ansible
+
+Hosts: 
+	called as inventory file, where we define hosts and configure combine hosts into groups
+
+ansible.cfg: 
+	ansible default configuration file. If we run any ansible command, first it search for evn variable (ANSIBLE_CONFIG) which has path.
+	Then search in current working directory, Then search in user home for .ansible.cg, and then default in /etc/ansible/ansible.cfg
+
+Roles:
+	Ansible roles consists of many playbooks, which is similar to modules in puppet, and cook books in chef.
+	Roles used to group multiple tasks together into one container to do automation in effective manner with clean directory structure
+	Roles are set of tasks and additional files which allow you breakup the configurations
+	Roles can be reuse if its useful for any other configuration.
+		Using ansible-galaxy, what has a templete to create the roles with pre-defined direcotory structure.
+
+
+ansible-galaxy commands:
+------------------------
+
+ansible-galaxy init /ect/ansible/roles/apache --offline --> This will initialize roles from offline with pre-defined directory structure in given path.
+
+ansible-galaxy init /ect/ansible/roles/apache --> This command to download the roles from online.
+
+directory structure created in /etc/ansible/roles/apache like below
+
+|--README.md --> read me text file
+|
+|--defaults --> which has default VARIBALE for the roles, in yaml with in this directory we can declare the VARIABLES which will be used for the deployment
+|
+|	-- main.yaml
+|
+|--file --> This directory contains the files which are required to push to the target machine.
+|
+|--handler --> This handler may be used by this role or any where outside this role 
+|
+|	-- main.yml
+|
+|--meta --> Stored meta data in yaml like Author, Dependency, Version GitHubBranch, supported platforms 
+|
+|	--main.yml
+|
+|--tasks --> contains main of tasks to be executed by the role, Instead of writing tasks, we can import the tasks form existing playbooks ( import_tasks: playbookname.yml )
+|
+|	--mail.yml 
+|
+|--templetes --> Templetes can be deployed via this role.
+|
+|--tests -->
+|
+|	--inventory
+|
+|	--test.yml
+|
+|--vars --> Used to store the VARIBLES, but vars has highest priority than defaults.
+|
+|	--main.yml
+
+
+To run the role, we need to create playbook and defile the roles in it, like below
+
+	---
+	- hosts: host/hostgroup
+	  roles: 
+	  - apache 
+
+
+
+
+
+syntax to run adhoc-command's
+------------------------------
+
+ansible host/hostgruop -a uptime --> here -a is used to comand 
+
+ansible host/hostgroup -a "uname -a" --> using option/command
+
+ansible-doc -l --> gives the list of modules-adhoc commands
+
+ansible-doc modulename--> gives complete information about the module
+
+ansible host/hostgroup -m yum "name=httpd state=present" --> installing httpd using module
+
+ansible host/hostgroup -a "yum install http" --> installing httpd using command
+
+
+The ansible.builtin.file module allows changing ownership and permissions on files. These same options can be passed directly to the copy module as well
+
+	ansible webservers -m ansible.builtin.file -a "dest=/srv/foo/a.txt mode=600"
+	ansible webservers -m ansible.builtin.file -a "dest=/srv/foo/b.txt mode=600 owner=mdehaan group=mdehaan"
+
+The file module can also create directories, similar to mkdir -p
+
+	ansible webservers -m ansible.builtin.file -a "dest=/path/to/c mode=755 owner=mdehaan group=mdehaan state=directory"
+
+ansible playbook
+----------------
+
+Generally yaml file should starts and end with with ---
+
+at first we need the declare hosts --> hosts: host\hostgroup
+
+each playbooks have tasks in a sequential, in task we define modules
+
+
+########################################################################
+sample playbook to install httpd with name {install.yaml}
+-------------------------------------------------------
+---
+- hosts: host/hostgroup/all
+  tasks:
+  - name: Insatlling Httpd --> we can give any name
+    yum: name=https status=present
+  - name: Starting service
+    service: name=https state=restarted
+  handler: --> This module runs only when there is any change to the configuration
+  - name: restart apache
+    service: name=httpd status=restarted
+
+
+---
+
+
+
+########################################################################
+
+ansible-playbook install.yaml --syntax-check --> This command will veiry the syntax which is written in given playbook.
+
+ansible-playbook install.yaml --> to run play book
+
+ansible-playbook -i /path/user/host.txt install.yaml --> uses the hostfile which we define instead of default
+
+ansible-playbook install.yaml --list-hosts --> This gives the list of host in which this playbook is going to run
+
+
+
+ 
+
+
+
+
+
+
+
