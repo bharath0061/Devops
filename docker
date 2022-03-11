@@ -1,0 +1,165 @@
+DOCKER COMMANDS
+===============
+
+docker ps --> show the list of running containers
+
+docker ps -a --> list of all (running/stoped) containes with container id, image, name, when created, status, open port
+
+docker rm containerID/containername --> Deletes stopped container
+
+docker rm -rf containerID/containername --> Deletes all(running/stopped) containers
+
+docker rmi imagename/imageid --> Deletes images, also deletes all container that are associated with image.
+
+docker rmi -f imagename/imageid --> This will untag and deletes the images
+
+docker pull imagename:version --> pulls the specified version of docker image
+
+docker pull imagename:latest --> pulls the latest version of docker image
+
+docker images --> shows the list of images which are already pulled
+
+docker run imagename --> starts starts container, it pulls image from dockerhub if the image not available
+
+docker run -d imagename --> runs the container in detach mode
+
+docker stop containerID --> stops the running container
+
+docker start containerID --> starts the container
+
+docker run -p1000:1000 -d containerID --> start container and mapping port of local and target
+
+docker logs containerID/containername --> To see logs of container
+
+docker run -p1000:1000 -d --name containerName containerID --> crate the container with the given name, else docker generate random id
+
+docker exec -it containerID/name /bin/bash --> To login into container, typically used for debugging, run exit command to exir from container
+
+docker attach containerID/name --> to attach local machine STDIN, STDOUT, STDERROR with the container, by exiting this process will the container, press control Q to detach from container.
+
+docker save imagename > anyname.tar --> to create the tar of image, which can transfer to any machine.
+
+docker save -o anypath/anyname.tar imagename --> to create a tar out of image in specified path.
+
+docker load -i anyname.tar --> to extract image form tar.
+
+cat ~/my_password.txt | docker login --username foo --password-stdin --> to login into docker registry
+
+docker logout [SERVER] --> logout from a registry
+
+
+DOCKER NETWORK COMMANDS
+=======================
+
+docker network ls --> list of networks
+
+docker network create networkname --> to create docker network
+
+docker run -p1000:1000 -d -e user=admin -epassword=somepassword --network networkname --name containerName containerID --> staring using networkname and evnronment variables
+
+
+DOCKER COMPOSE
+==============
+
+Docker compose is used to define all the configuraton and run multiple containers in a yaml file.
+Using docker compose we don't need to create network, docker compose take care of creating network.
+
+
+#########################################################
+sample docker compose file compose.yaml
+------------------------------------------------
+
+version:'3' --> version of docker compose
+services:
+	mandodb: --> container name
+		image: mango:latest --> Imagename
+		ports:
+		-1000:1000 --> hostPort:containerPort
+		environment:
+		-username:admin
+		-passwoed:somepassword
+
+##########################################################
+
+docker-compose -f compose.yaml up --> To run container using docker compose yaml file
+
+docker-compose -f compose.yaml down --> stops the running containers and deletes the network as well
+
+
+DOCKERFILE
+==========
+
+dockerfile is a file in which we define the configuration to build a image
+
+docker build -t imagename:1.0  --> This command build image from given dockerfile, -t used to provide tag for image.
+
+docker build -t imagename:1.0 -f mydockerfile --> build image using given file
+
+docker tag imagename/ID dockerregistry/httpd:version1.0 --> to push image, first do docker login, then tag image, and push
+
+docker push imagename/ID:tag  dockerregistry/httpd:version1.0 --> This will push image to docker registry
+
+
+
+
+#########################################################
+Sample docker file
+--------------------------------------------------------
+
+FROM imagename:latest --> This pulls the latest image
+
+ENV user=admin password=somepassword --> to define environment variables
+
+RUN mkdir -p /home/user --> run used to execute any linux commands inside of a container
+
+COPY /home/user/file.txt /home/user/file.txt --> This is used to copy any files from host machine to container
+
+CMD --> is used to provide defaults for an executing container, There can be only one CMD instruction in a docker file, if we list more 
+        than one then only last will take effect. Even ENTRYPOINT also do the same thing, 
+        There should be atleast one ENTRYPOINT or CMD instruction in dockerfile.
+
+LABEL version='1.0' --> LABEL instruction add metadata to an image.
+
+MAINTAINER org='HCL' --> MAINTAINER instruction add the Author feild to generated image
+
+EXPOSE 80/tcp --> EXPORT instruction informs the docker that the container listned to specified network port at run time.
+
+EXPOSE 80/udp
+
+ADD /home/user/file.txt /home/user/file.txt --> lets you do that too, but it also supports 2 other sources. First, you can use a URL
+                                                instead of a local file/directory. Secondly, you can extract tar from the source
+                                                directory into the destination.
+
+ENTRYPOINT ["/home/user/somescript.sh"] --> This also works same as CMD, if CMD is already defined, This will overwrite the CMD
+                                            There should be atleast one ENTRYPOINT or CMD instruction in dockerfile.
+
+VOLUME /mnt/shareddir /mnt/shareddir --> The VOLUME instruction creates a mount point with the specified name and marks it as holding
+                                         externally mounted volumes from native host or other containers.
+
+USER someusername --> The USER instruction sets the user name (or UID) and optionally the user group (or GID) to use when running the
+                      image and for any RUN, CMD and ENTRYPOINT instructions that follow it in the Dockerfile
+
+WORKDIR /path/to/workdir --> The WORKDIR instruction sets the working directory for any RUN, CMD, ENTRYPOINT, COPY and ADD instructions
+                             that follow it in the Dockerfile. If the WORKDIR doesn’t exist, it will be created even if it’s not used in
+                             any subsequent Dockerfile instruction.
+
+SHELL ["cmd", "/S", "/C"] --> This will tells the image to CMD instead of shell.
+                              The SHELL instruction allows the default shell used for the shell form of commands to be overridden.
+                              The default shell on Linux is ["/bin/sh", "-c"], and on Windows is ["cmd", "/S", "/C"].
+
+######################################################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
