@@ -7,6 +7,7 @@ Features: High availability with zero downtime.
 		  scalability or high perormane.
 		  Disaster recovery - backup and restore.
 
+Below are the Components
 
 pod: smallest unit of k8s
 	 Abstraction over container
@@ -19,7 +20,7 @@ service: service is basicllay a permanent ip adress which will attach to the pod
 		 Also provides load Balancing between the pods/nodes that are configured under same service.
 		 
 		 
-configmap: External configuration of application like mapping to other container or any other application.
+configmap: External configuration of application like mapping to other container or any other application. we cant' access configmap from another namespace
  
 
 secret: used to store credentials, certificates and other thing that not access to others in base64 encoded format.
@@ -65,9 +66,46 @@ Master node: Every master node runs with 4 processes that are.
 				etcd : etcd is a cluster brain, which stores the cluster changes (not app/db data) in key value store.
 				
 				
+
+NAMESPACE
+---------
+
+Namespaces are used for dividing cluster resources into specific groups which is created by multiple users. They are meant for environments where there are many users spread across projects or teams and provide a scope of resources in same cluster. And are is isolated to each other, Even we can limit cpu, Ram, storage per namesapce,
+we can use our own namespace as default namespace using kubens tool
+
+	In kubernetes cluster we can organise resources in namespace
+	we can have multiple namespace in a cluster
+		Structure your components.
+		Avoid conflicts between teams.
+		Share services between environments
+		Access and resource limits on namespace level
+	we can't access most resource from another name space like configmap
 	
 
 
+Dfault namespace: which is used by system for system process, Master managing process, kubectl process
+
+kube - public: which has publicly accessable data, it has a configmap that contains cluster information which is accessable even without authentication
+
+kube-node-lease: whihc holds the information of heart beats of nodes, each node has basically gets its own object that contains information about availability of node
+
+default: is used to create the resources
+
+
+Blue/gree Deployment : Having two different version of application in same cluster, One is active which is production, and the another one going to be the next production version, 
+
+
+
+
+kubectl get namespace --> list out the available namespaces 
+
+kutectl create namespace anynamespace --> This will create new name space.
+
+kubectl apply -f config-file.yaml --namspace=anynamespace --> This will create service/configmap/deployment in given namespace, we can also define namespace in config file.
+
+
+
+==================================================================================
 
 kubectl cluster-info − It displays the cluster Info
 
@@ -75,11 +113,17 @@ kubectl get nodes —> gets the status of nodes
 
 kubectl get pod —> gets the list of pods
 
+Kubectl get pod -o wide --> gets the list of pod with more information
+
 Kubectl get services —> get the list of services
+
+kubectl get configmap -n default --> list the configmap 
 
 Kubectl create deployment NAME —image=image name —> deploy pods
 
 Kubectl get deployment —> gets list deployment
+
+kubectl get all --> get the list of all deployments and services
 
 Kubectl get replicates —> get the list of replica
 
@@ -93,31 +137,140 @@ Kubectl exec  -it podname — bin/bash —> to login into container for debuggin
 
 Kubectl delete deployment deploymentname —> to delete pods, also delete the pods
 
+Kubectl delete deployment -f config-file.yaml --> which deletes the deployments and its pod which are created earlier using same config file.
+
 Kubectl apply -f config-file.yaml  —> To create update deplyment components using configuration file in which we define the configuration like service volumes, 
 
+Kubectl get deployment deployment name -o yaml ---> which gives the status of deployment which is saved in etcd
+
+kubectl apply -f credentials.yaml --> This will create a secrets
+
+kubectl get secrets --> to list the secrets, which can be used in deployment for masking the password.
+
+
+#########################################################################
 Basic configuration deployment file
+----------------------------------------------------
 
 Apiversion: apps/v1  
 Kind: Deployment/service
-Metadat:
+Metadata:
 	name: nginx-depl
 	labels:
 		app: nginx
+	namespace: anynamespace --> This deployment with given name space
 Spec:
 	replicas: 1
 	selector:
 		matchLabels:
 			app: nginx
+	type: LoadBalance  --> Assigns service an external IP address and so accepts external requests
 	templete:
 		metadata:
 			labels:
 				app: nginx
 		spec:
-			container:
+			containers:
 			 - name: nginx
 			   image: nginx:1.0
 			   ports:
 			   - containerPort: 80
+			   env:
+				valueFrom:
+					secretsKeyRef:
+						name: credentials --> secret name that is used in secret file
+						key: username --> username that is used in secret file
+						key: password --> password thai is used in secret file
+			volumeMounts:
+			- mountPath: "/usr/share/tomcat/html"
+				name: mypd
+			volumes:
+				- name: mypd
+					persistentVolumeClaim:
+					claimName: myclaim-1
 
-			 
-			 
++##########################################################################
+
+secrets yaml file
+-----------------
+
+apiversion: v1
+
+kind: secret
+
+metadate:
+
+	name: credentials --> anyname
+
+type: Opaque. --> Opaque is default for arbitary key-value pairs
+
+data:
+
+	username:            --> Here in place of username we can give name and key value mush be base64 encoded, using (echo -n 'username' | base64) will generate a value
+	passoword:               This value should be used for key pairs of username and password
+
+##########################################################################
+creating persistant volume
+
+kind: PersistentVolume ---------> 1
+apiVersion: v1
+metadata:
+   name: pv0001 ------------------> 2
+   labels:
+      type: local
+spec:
+   capacity: -----------------------> 3
+      storage: 10Gi ----------------------> 4
+   accessModes:
+      - ReadWriteOnce -------------------> 5
+      hostPath:
+         path: "/tmp/data01" --------------------------> 6
+
+
+#########################################################################
+
+
+HELM CHARTS
+-----------
+
+	Helm is a package manager for kubernetes.
+	This package bundle consists yaml.files that are required for project deplyment.
+	We can push this package to Helm repository, Download and use the existing one in dirrent environments like, qa, pre-prod, UAT.
+	we need helm client to push helm charts to kubernetes cluster, and kubernetes cluster need to install server (Tiller)
+	
+
+Templete Engine: 
+	Is a yaml file in which we configure the deployments or services configmap, volumes, as a dynamic place holder.
+	For example if we are doplying n number of microservices or deploying in different environmet cluster like qa, pre-prod, UAT
+	we don't need to write yaml file all microservices, we can have one and using place holders(paramerters) 
+	we can pass dynamic values, like container name, image, port, credetials.
+
+Heml chart direcoty structure:
+------------------------------
+
+mychart/
+
+	chart.yaml  --> meta information of the chart
+
+	values.yaml  --> values for the templete files
+
+	charts/ --> chart dependencies, if these charts are dependent on another charts, then those charts are placed inside chart directory
+
+	templetes/ --> templete files are stored in this directory and readme, license files also go into this directory
+	
+		values.yaml --> this file stores values
+
+===================================================================
+
+helm install chartname --> this command deploy the charts using yaml files into kubernetes
+
+helm install --values=my-values.yaml chartname --> using given file, the values are overwrite in the actual value file.
+
+helm inarLL --set version=1.0 chartname --> overwrite values that are defined in value file.
+
+helm upgrade chartname --> To upgrade
+
+helm rollback chartname --> if the upgrade fails for some reason, we can roll back to previous version
+
+
+		 
