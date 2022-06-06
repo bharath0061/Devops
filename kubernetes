@@ -53,9 +53,12 @@ kubelet: kubelet is responsible to start the pods with a container inside and as
 		 
 kubeproxy: farwords the request between the pods which are running on same node. 
 
+Container network interface plugin: To establish connection between the nodes
+===================================
+
 
 Master node: Every master node runs with 4 processes that are.
-
+###########
 				Api server: which recives authorized request through client, then validate request for creating/scheduling pod.
 				query health of pods 
 
@@ -63,7 +66,7 @@ Master node: Every master node runs with 4 processes that are.
 				
 				Controller manager: detect state of pods and recover.
 				
-				etcd : etcd is a cluster brain, which stores the cluster changes (not app/db data) in key value store.
+				etcd : is a key value data store, etcd is a cluster brain, which stores the cluster changes (not app/db data) in key value store.
 				
 				
 
@@ -109,7 +112,7 @@ kubectl apply -f config-file.yaml --namspace=anynamespace --> This will create s
 
 kubectl cluster-info − It displays the cluster Info
 
-kubectl get nodes —> gets the status of nodes
+kubectl get nodes —> gets the list and status of nodes
 
 kubectl get pod —> gets the list of pods
 
@@ -272,5 +275,62 @@ helm upgrade chartname --> To upgrade
 
 helm rollback chartname --> if the upgrade fails for some reason, we can roll back to previous version
 
+=============================================================================
 
-		 
+Steps to install EKS on AWS
+---------------------------
+
+	> Create IAM for EKS cluster
+	> Create dedicated VPC for EKS cluster
+	> Create EKS cluster
+	> Install and setup IAM Authenticator and Kubectl utility
+	> Create IAM roles for EKS worker nodes
+	> Create worker nodes
+	
+
+
+
+ 
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			 
+			 
