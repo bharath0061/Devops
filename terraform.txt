@@ -1,0 +1,24 @@
+Components of terraform
+
+	1. Provider --> is defined to interact the cloud providers like cloud provider name, access keys
+	2. Resource --> where we define infrastructure details that we want deploy like Compute, virtual network, storage.
+			In one resource block we can define one or more infrastructure details.
+	3. Variables --> variable.tf is a separate file to store variable.
+	4. Statefile --> After deployment terraform creates a state file with name terraform.tfstate to keep track of current state.
+	5. Provisioners --> where we can define additional steps to run after the infrastructure deployment done like, executing scripts, installing packages, copying file.
+
+Commands:
+---------
+
+Terraform init  ---> First we need to run this command so that it will download the provider information from terraform website and keep it in .terraform folder.
+		     We can't do any thing without running this command, which is must and should.
+
+Terraform plan  ---> by executing this command, shows what is going to deploy which we define in code.
+		     And also create a statefile which have the information of current state of our cloud.
+
+Terraform apply  ---> This command start deployment the infrastructure in the cloud.
+
+
+
+
+
